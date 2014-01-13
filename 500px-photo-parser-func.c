@@ -81,7 +81,7 @@ bool isPhotoNode(TidyDoc doc, TidyNode node)
 		TidyAttr attr;
 		/* walk the attribute list */ 
 		for ( attr=tidyAttrFirst(node); attr; attr=tidyAttrNext(attr) ) {
-			printf(tidyAttrName(attr));
+			printf("%s", tidyAttrName(attr));
 			tidyAttrValue(attr)?printf("=\"%s\" ",
 			tidyAttrValue(attr)):printf(" ");
 		}
@@ -166,6 +166,8 @@ result_cleanup(gpointer data)
 	if (result->author) {
 		free(result->author);
 	}
+
+	free(result);
 }
  
 void print_result_info(result_t *result)
@@ -184,7 +186,6 @@ GSList *
 get_results(const char *search_term)
 {
 	GSList *results = NULL;
-	result_t *result = NULL;
 	GString *url = NULL;
 
 	/* Check if an actual search term was submitted, return otherwise */
@@ -220,6 +221,8 @@ get_results(const char *search_term)
 
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
 	err=curl_easy_perform(curl);
+
+	g_string_free(url, TRUE);
 
 	if ( !err ) {
 		tidy_result = tidyParseBuffer(tdoc, &docbuf); /* parse the input */ 
